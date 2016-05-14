@@ -1,5 +1,6 @@
 package com.example.android.sunshine.app;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -12,6 +13,7 @@ import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 
@@ -79,6 +81,20 @@ public class ForecastFragment extends Fragment {
 
         ListView lview = (ListView) rootView.findViewById(R.id.listview_forecast);
         lview.setAdapter(forecastAdapter);
+        lview.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            public void onItemClick(AdapterView<?> adapterView, View view, int position, long l){
+                String forecast = forecastAdapter.getItem(position);
+                /*Context context = getActivity();
+                CharSequence text = forecast;
+                int duration = Toast.LENGTH_SHORT;
+                Toast toast = Toast.makeText(context, text, duration);
+                toast.show();*/
+                Intent intent = new Intent(getActivity(), DetailActivity.class)
+                        .putExtra(Intent.EXTRA_TEXT, forecast);
+                startActivity(intent);
+
+            }
+        });
 
         FetchWeatherTask weather = new FetchWeatherTask();
         weather.execute("galway");
@@ -147,24 +163,17 @@ public class ForecastFragment extends Fragment {
             String[] resultStrs = new String[numDays];
             for (int i = 0; i < weatherArray.length(); i++) {
                 // For now, using the format "Day, description, hi/low"
-                String day;
-                String description;
-                String highAndLow;
 
                 // Get the JSON object representing the day
                 JSONObject dayForecast = weatherArray.getJSONObject(i);
 
-                // The date/time is returned as a long.  We need to convert that
-                // into something human-readable, since most people won't read "1400356800" as
-                // "this saturday".
-                long dateTime;
                 // Cheating to convert this to UTC time, which is what we want anyhow
-                dateTime = dayTime.setJulianDay(julianStartDay + i);
-                day = getReadableDateString(dateTime);
+                long dateTime = dayTime.setJulianDay(julianStartDay + i);
+                String day = getReadableDateString(dateTime);
 
                 // description is in a child array called "weather", which is 1 element long.
                 JSONObject weatherObject = dayForecast.getJSONArray(OWM_WEATHER).getJSONObject(0);
-                description = weatherObject.getString(OWM_DESCRIPTION);
+                String description = weatherObject.getString(OWM_DESCRIPTION);
 
                 //Log.v(LOG_TAG, "Weather Object: "+weatherObject.toString());
 
@@ -174,13 +183,9 @@ public class ForecastFragment extends Fragment {
                 double high = temperatureObject.getDouble(OWM_MAX);
                 double low = temperatureObject.getDouble(OWM_MIN);
 
-                highAndLow = formatHighLows(high - 273.15, low - 273.15);
+                String highAndLow = formatHighLows(high - 273.15, low - 273.15);
                 resultStrs[i] = day + " - " + description + " - " + highAndLow;
             }
-
-            /*for (String s : resultStrs) {
-                Log.v(LOG_TAG, "Forecast entry: " + s);
-            }*/
             return resultStrs;
         }
 
@@ -199,7 +204,7 @@ public class ForecastFragment extends Fragment {
             String forecastJsonStr = null;
             String format = "json";
             String units = "metric";
-            int numDays = 3;
+            int numDays = 14;
 
             try {
                 // Construct the URL for the OpenWeatherMap query
