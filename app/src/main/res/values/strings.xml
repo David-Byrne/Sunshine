@@ -11,4 +11,21 @@
     <string name="title_activity_detail">Details</string>
     <string name="title_activity_settings">Settings</string>
 
+    <string name="pref_location_key" translatable="false">location</string>
+    <string name="pref_location_label">Location</string>
+    <string name="pref_location_default" translatable="false">Galway</string>
+
+    <string name="pref_units_key" translatable="false">unit</string>
+    <string name="pref_units_label">Unit</string>
+    <string name="pref_units_metric" translatable="false">metric</string>
+    <string name="pref_units_imperial" translatable="false">imperial</string>
+    <string name="pref_units_label_metric">Metric</string>
+    <string name="pref_units_label_imperial">Imperial</string>
+
+    <string name="action_map">Map</string>
+
+    <string name="action_share">Share</string>
+
+    <string name="hashtag">#SunshineApp</string>
+
 </resources>
