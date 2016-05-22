@@ -7,7 +7,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
 import android.support.v4.app.Fragment;
-import android.text.format.Time;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
@@ -32,7 +31,11 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.GregorianCalendar;
 import java.util.List;
+import java.util.Locale;
 
 /**
  * Created by david on 14/05/2016.
@@ -58,8 +61,6 @@ public class ForecastFragment extends Fragment {
     public boolean onOptionsItemSelected(MenuItem item){
         int id = item.getItemId();
         if (id == R.id.action_refresh) {
-            //FetchWeatherTask weather = new FetchWeatherTask();
-            //weather.execute("80200");
             updateWeather();
             return true;
         }
@@ -109,13 +110,6 @@ public class ForecastFragment extends Fragment {
         weather.execute(location);
     }
 
-    @Override
-    public void onStart(){
-        super.onStart();
-        //updateWeather();
-    }
-
-
     public class FetchWeatherTask extends AsyncTask<String, Void, String[]>{
 
 
@@ -151,50 +145,41 @@ public class ForecastFragment extends Fragment {
             final String OWM_LIST = "list";
             final String OWM_WEATHER = "weather";
             final String OWM_TEMPERATURE = "temp";
-            final String OWM_MAX = "temp_max";
-            final String OWM_MIN = "temp_min";
+            final String OWM_MAX = "max";
+            final String OWM_MIN = "min";
             final String OWM_DESCRIPTION = "description";
             final String OWM_MAIN = "main";
 
             JSONObject forecastJson = new JSONObject(forecastJsonStr);
             JSONArray weatherArray = forecastJson.getJSONArray(OWM_LIST);
 
-            Time dayTime = new Time();
-            dayTime.setToNow();
-
-            // we start at the day returned by local time. Otherwise this is a mess.
-            int julianStartDay = Time.getJulianDay(System.currentTimeMillis(), dayTime.gmtoff);
-
-            // now we work exclusively in UTC
-            dayTime = new Time();
-
-            String[] resultStrs = new String[numDays];
+            String[] resultsAry = new String[numDays];
             for (int i = 0; i < weatherArray.length(); i++) {
                 // For now, using the format "Day, description, hi/low"
 
                 // Get the JSON object representing the day
                 JSONObject dayForecast = weatherArray.getJSONObject(i);
-
-                // Cheating to convert this to UTC time, which is what we want anyhow
-                long dateTime = dayTime.setJulianDay(julianStartDay + i);
-                String day = getReadableDateString(dateTime);
+                Long millis = dayForecast.getLong("dt");
+                Date time = new Date(millis*1000);
+                Calendar cal = new GregorianCalendar();
+                cal.setTime(time);
+                SimpleDateFormat format = new SimpleDateFormat("EE, MMMM d", Locale.UK);
+                String day = format.format(cal.getTime());
 
                 // description is in a child array called "weather", which is 1 element long.
                 JSONObject weatherObject = dayForecast.getJSONArray(OWM_WEATHER).getJSONObject(0);
                 String description = weatherObject.getString(OWM_DESCRIPTION);
 
-                //Log.v(LOG_TAG, "Weather Object: "+weatherObject.toString());
-
-                // Temperatures are in a child object called "temp".  Try not to name variables
-                // "temp" when working with temperature.  It confuses everybody.
-                JSONObject temperatureObject = dayForecast.getJSONObject(OWM_MAIN);
+                JSONObject temperatureObject = dayForecast.getJSONObject(OWM_TEMPERATURE);
                 double high = temperatureObject.getDouble(OWM_MAX);
                 double low = temperatureObject.getDouble(OWM_MIN);
 
                 String highAndLow = formatHighLows(high - 273.15, low - 273.15);
-                resultStrs[i] = day + " - " + description + " - " + highAndLow;
+                resultsAry[i] = day + " - " + description + " - " + highAndLow;
+
+                prevDay = cal.get(Calendar.DAY_OF_WEEK);
             }
-            return resultStrs;
+            return resultsAry;
         }
 
         protected String[] doInBackground(String... params) {
@@ -216,7 +201,7 @@ public class ForecastFragment extends Fragment {
                 // Construct the URL for the OpenWeatherMap query
                 // Possible parameters are avaiable at OWM's forecast API page, at
                 // http://openweathermap.org/API#forecast
-                final String BASE_URL = "http://api.openweathermap.org/data/2.5/forecast?";
+                final String BASE_URL = "http://api.openweathermap.org/data/2.5/forecast/daily?";
                 final String QUERY_PARAM = "q";
                 final String FORMAT_PARAM = "mode";
                 final String UNITS_PARAM = "metric";
