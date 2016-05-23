@@ -176,8 +176,6 @@ public class ForecastFragment extends Fragment {
 
                 String highAndLow = formatHighLows(high - 273.15, low - 273.15);
                 resultsAry[i] = day + " - " + description + " - " + highAndLow;
-
-                prevDay = cal.get(Calendar.DAY_OF_WEEK);
             }
             return resultsAry;
         }
