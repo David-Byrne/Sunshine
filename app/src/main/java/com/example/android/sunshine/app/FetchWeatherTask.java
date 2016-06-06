@@ -34,8 +34,6 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
         mContext = context;
     }
 
-    private boolean DEBUG = true;
-
     /**
      * Helper method to handle insertion of a new location in the weather database.
      *
@@ -273,6 +271,8 @@ public class FetchWeatherTask extends AsyncTask<String, Void, Void> {
                     .build();
 
             URL url = new URL(builtUri.toString());
+
+            Log.w(LOG_TAG, url.toString());
 
             // Create the request to OpenWeatherMap, and open the connection
             urlConnection = (HttpURLConnection) url.openConnection();
