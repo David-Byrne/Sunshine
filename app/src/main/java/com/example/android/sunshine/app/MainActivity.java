@@ -11,11 +11,12 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 
-public class MainActivity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity implements ForecastFragment.Callback{
 
     private final String LOG_TAG = MainActivity.class.getSimpleName();
-    private final String FORECASTFRAGMENT_TAG = "FFTAG";
+    private static final String DETAILFRAGMENT_TAG = "DFTAG";
     private String curLocation;
+    private boolean twoPane;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,31 +24,48 @@ public class MainActivity extends ActionBarActivity {
         curLocation = Utility.getPreferredLocation(this);
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        if (savedInstanceState == null) {
-            getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new ForecastFragment(), FORECASTFRAGMENT_TAG)
-                    .commit();
+        if(findViewById(R.id.weather_detail_container) != null){
+            twoPane = true;
+            if(savedInstanceState == null){
+                getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.weather_detail_container, new DetailFragment())
+                        .commit();
+            }
         }
+        else{
+            twoPane = false;
+            getSupportActionBar().setElevation(0f);
+        }
+
+        ForecastFragment ff = ((ForecastFragment) getSupportFragmentManager()
+                .findFragmentById(R.id.fragment_forecast));
+        ff.setUseTodayLayout(!twoPane);
     }
     @Override
     protected void onStart() {
         Log.v(LOG_TAG, "onStart");
         super.onStart();
     }
+
     @Override
     protected void onResume() {
-        Log.v(LOG_TAG, "onResume");
         super.onResume();
-        String prefLocation = Utility.getPreferredLocation(this);
-        if(prefLocation != null && !prefLocation.equals(curLocation)){
-            //if the new preferred location isn't the same as the old one
-            ForecastFragment ff = (ForecastFragment)getSupportFragmentManager().findFragmentByTag(FORECASTFRAGMENT_TAG);
-            if ( ff != null ) {
+        String prefLocation = Utility.getPreferredLocation( this );
+        // update the location in our second pane using the fragment manager
+        if (prefLocation != null && !prefLocation.equals(curLocation)) {
+            ForecastFragment ff = (ForecastFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
+
+            if (null != ff) {
                 ff.onLocationChanged();
+            }
+            DetailFragment df = (DetailFragment) getSupportFragmentManager().findFragmentByTag(DETAILFRAGMENT_TAG);
+            if (null != df) {
+                df.onLocationChanged(prefLocation);
             }
             curLocation = prefLocation;
         }
     }
+
     @Override
     protected void onDestroy() {
         Log.v(LOG_TAG, "onDestroy");
@@ -107,4 +125,21 @@ public class MainActivity extends ActionBarActivity {
         }
     }
 
+    @Override
+    public void onItemSelected(Uri contentUri) {
+        if (twoPane) {
+            Bundle args = new Bundle();
+            args.putParcelable(DetailFragment.DETAIL_URI, contentUri);
+
+            DetailFragment fragment = new DetailFragment();
+            fragment.setArguments(args);
+
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.weather_detail_container, fragment, DETAILFRAGMENT_TAG)
+                    .commit();
+        } else {
+            Intent intent = new Intent(this, DetailActivity.class).setData(contentUri);
+            startActivity(intent);
+        }
+    }
 }
