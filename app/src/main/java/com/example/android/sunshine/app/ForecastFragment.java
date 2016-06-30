@@ -1,5 +1,6 @@
 package com.example.android.sunshine.app;
 
+import android.content.Intent;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
@@ -7,6 +8,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.LoaderManager;
 import android.support.v4.content.CursorLoader;
 import android.support.v4.content.Loader;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -20,7 +22,7 @@ import com.example.android.sunshine.app.data.WeatherContract;
 import com.example.android.sunshine.app.sync.SunshineSyncAdapter;
 
 public class ForecastFragment extends Fragment implements LoaderManager.LoaderCallbacks<Cursor>{
-
+    public static final String LOG_TAG = ForecastFragment.class.getSimpleName();
     public static final int FORECAST_LOADER = 0;
     ForecastAdapter forecastAdapter;
 
@@ -73,9 +75,33 @@ public class ForecastFragment extends Fragment implements LoaderManager.LoaderCa
             updateWeather();
             return true;
         }
+        if (id == R.id.action_map) {
+            openPreferredLocationInMap();
+            return true;
+        }
         return super.onOptionsItemSelected(item);
     }
 
+    public void openPreferredLocationInMap() {
+        if (null != forecastAdapter) {
+            Cursor c = forecastAdapter.getCursor();
+            if (c != null) {
+                c.moveToPosition(0);
+                String posLat = c.getString(COL_COORD_LAT);
+                String posLong = c.getString(COL_COORD_LAT);
+
+                Uri geolocation = Uri.parse("geo:" + posLat + "," + posLong);
+                Intent intent = new Intent(Intent.ACTION_VIEW);
+                intent.setData(geolocation);
+
+                if (intent.resolveActivity(getActivity().getPackageManager()) != null) {
+                    startActivity(intent);
+                } else {
+                    Log.d(LOG_TAG, "Couldn't call " + geolocation.toString() + ", no receiving apps installed!");
+                }
+            }
+        }
+    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
