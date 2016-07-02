@@ -4,6 +4,11 @@
     <style name="AppTheme" parent="@style/Theme.AppCompat.Light.DarkActionBar">
         <item name="colorPrimary">@color/sunshine_blue</item>
         <item name="colorPrimaryDark">@color/sunshine_dark_blue</item>
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
+    </style>
+
+    <style name="SettingsFragmentTheme" parent="Theme.AppCompat.NoActionBar">
+        <item name="preferenceTheme">@style/PreferenceThemeOverlay</item>
     </style>
 
     <!-- Main activity theme. -->
@@ -17,14 +22,25 @@
 
     <!-- main activity action bar styles -->
     <style name="ActionBar.Solid.Sunshine.NoTitle" parent="@style/Widget.AppCompat.Light.ActionBar.Solid.Inverse">
-        <item name="displayOptions">useLogo|showHome</item>
-        <item name="logo">@drawable/ic_logo</item>
+        <!--<item name="displayOptions">useLogo|showHome</item>
+        <item name="logo">@drawable/ic_logo</item>-->
+        <item name="elevation">4dp</item>
+
     </style>
 
     <!-- Style for forecast listview -->
     <style name="ForecastListStyle">
         <!-- Here it's a stub.  In screens of sufficient width, this style includes modifications
         for two-pane layout -->
+    </style>
+
+    <style name="SunshineSwitch" parent="Theme.AppCompat.Light">
+        <!-- active thumb & track color (30% transparency) -->
+        <item name="colorControlActivated">@color/sunshine_yellow</item>
+        <!-- inactive thumb color-->
+        <item name="colorSwitchThumbNormal">@color/sunshine_yellow</item>
+        <!-- inactive track color (30% transparency) -->
+        <item name="android:colorForeground">@color/grey</item>
     </style>
 
 </resources>
