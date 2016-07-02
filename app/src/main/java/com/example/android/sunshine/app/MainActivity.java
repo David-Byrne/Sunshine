@@ -34,7 +34,8 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
         }
         else{
             twoPane = false;
-            //getSupportActionBar().setElevation(0f);
+            //float num = getSupportActionBar().getElevation();
+            //Log.v(LOG_TAG, String.valueOf(num));
         }
 
         ForecastFragment ff = ((ForecastFragment) getSupportFragmentManager()
@@ -53,6 +54,7 @@ public class MainActivity extends ActionBarActivity implements ForecastFragment.
     protected void onResume() {
         super.onResume();
         String prefLocation = Utility.getPreferredLocation( this );
+        setTitle(prefLocation);
         // update the location in our second pane using the fragment manager
         if (prefLocation != null && !prefLocation.equals(curLocation)) {
             ForecastFragment ff = (ForecastFragment) getSupportFragmentManager().findFragmentById(R.id.fragment_forecast);
